@@ -1,9 +1,12 @@
 package com.zj.zhihu.presenter
 
+import android.support.annotation.Keep
 import com.trello.rxlifecycle2.LifecycleProvider
-import com.zj.zhihu.http.HttpManager
 import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.functions.Action
 import io.reactivex.functions.Consumer
+import io.reactivex.schedulers.Schedulers
 
 /**
  * Created by zhengjiong
@@ -11,9 +14,23 @@ import io.reactivex.functions.Consumer
  */
 
 open class BasePresenter(val lifecycleProvider: LifecycleProvider<*>) {
-    val httpManager = HttpManager
 
     fun <T> submitRequest(observable: Observable<T>, onNext: Consumer<T>, onError: Consumer<Throwable>) {
-        httpManager.doHttp(lifecycleProvider, observable, onNext, onError)
+        doHttp(lifecycleProvider, observable, onNext, onError)
+    }
+
+
+    @Keep
+    fun <T> doHttp(lifecycleProvider: LifecycleProvider<*>, httpObservable: Observable<T>, onNext: Consumer<T>, onError: Consumer<Throwable>) {
+        httpObservable
+                /*失败后的retry配置*/
+                //.retryWhen(RetryWhenNetworkException())
+                /*生命周期管理*/
+                .compose(lifecycleProvider.bindToLifecycle())
+                /*http请求线程*/
+                .subscribeOn(Schedulers.io())
+                .unsubscribeOn(Schedulers.io())
+                /*回调线程*/
+                .observeOn(AndroidSchedulers.mainThread()).subscribe(onNext, onError)
     }
 }

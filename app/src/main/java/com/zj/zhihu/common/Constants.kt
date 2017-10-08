@@ -8,12 +8,5 @@ class Constants {
     companion object {
         @JvmStatic
         val HHMMSS = "HH:MM:ss"
-
-        @JvmStatic
-        val BASE_URL = "http://news-at.zhihu.com/"
-        //val BASE_URL = "http://gank.io/api/"
-
-        @JvmStatic
-        val TIMEOUT = 10L
     }
 }

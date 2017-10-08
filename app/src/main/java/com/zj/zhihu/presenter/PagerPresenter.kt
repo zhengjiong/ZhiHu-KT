@@ -2,6 +2,8 @@ package com.zj.zhihu.presenter
 
 import com.trello.rxlifecycle2.LifecycleProvider
 import com.zj.zhihu.bean.PageBean
+import com.zj.zhihu.http.ApiManager
+import com.zj.zhihu.utils.transformer
 import io.reactivex.functions.Consumer
 
 /**
@@ -22,15 +24,16 @@ class PagerPresenter(lifecycleProvider: LifecycleProvider<*>) : BasePresenter(li
     }
 
     private fun requestList(onNext: Consumer<PageBean>, onError: Consumer<String>) {
-        submitRequest<PageBean>(
-                httpManager.zhihuApi.getLastestPager(),
-                Consumer<PageBean> { t ->
-                    t?.let {
-                    onNext.accept(t)
+        ApiManager.zhihuApi.getLastestPager()
+                .compose(lifecycleProvider.bindToLifecycle())
+                .compose(transformer())
+                .subscribe({
+                    it?.let {
+                        onNext.accept(it)
                     } ?: throw NullPointerException()
-                },
-                Consumer<Throwable> { t -> onError.accept(t?.message) }
-        )
+                }, {
+                    onError.accept(it?.message)
+                })
     }
 
 
