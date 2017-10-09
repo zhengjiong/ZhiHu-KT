@@ -2,6 +2,7 @@ package com.zj.zhihu.activity
 
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
+import android.widget.Toast
 import com.zj.zhihu.R
 import com.zj.zhihu.adapter.PagerAdapter
 import com.zj.zhihu.base.RxActivity
@@ -10,6 +11,8 @@ import com.zj.zhihu.bean.multiitem.PageItemEntity
 import com.zj.zhihu.presenter.PagerPresenter
 import io.reactivex.functions.Consumer
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlin.properties.Delegates
+import kotlin.reflect.KProperty
 
 /**
  * Created by zhengjiong
@@ -18,6 +21,15 @@ import kotlinx.android.synthetic.main.activity_main.*
 class PagerActivity : RxActivity() {
     var pagePresenter: PagerPresenter? = null
     var adapter: PagerAdapter? = null
+    var mBackPressTime: Long by Delegates.observable(0L) {
+        _, oldValue: Long, newValue: Long ->
+        println("oldValue=$oldValue newValue$newValue")
+        if (newValue - oldValue < 2000) {
+            super.onBackPressed()
+        } else {
+            Toast.makeText(this@PagerActivity, getString(R.string.exit_message), Toast.LENGTH_SHORT).show()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,5 +69,9 @@ class PagerActivity : RxActivity() {
             swipeRefresh.isRefreshing = false
             t?.let(::println)
         })
+    }
+
+    override fun onBackPressed() {
+        mBackPressTime = System.currentTimeMillis()
     }
 }
