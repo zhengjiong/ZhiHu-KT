@@ -62,9 +62,9 @@ class PagerActivity : RxActivity() {
             }
             stories?.forEach {
                 entities.add(PageItemEntity(PageItemEntity.TYPE_ITEM, it))
+            }.let {
+                adapter!!.setNewData(entities)
             }
-
-            adapter!!.setNewData(entities)
         }, Consumer { t ->
             swipeRefresh.isRefreshing = false
             t?.let(::println)
