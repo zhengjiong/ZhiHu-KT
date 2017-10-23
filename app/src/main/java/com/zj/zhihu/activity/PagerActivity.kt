@@ -21,15 +21,29 @@ import kotlin.reflect.KProperty
 class PagerActivity : RxActivity() {
     var pagePresenter: PagerPresenter? = null
     var adapter: PagerAdapter? = null
+
+    /**
+     * 第一个是初始化值(0L), 第二个是属性值变化事件的响应器(handler)
+     */
     var mBackPressTime: Long by Delegates.observable(0L) {
         _, oldValue: Long, newValue: Long ->
-        println("oldValue=$oldValue newValue$newValue")
+        println("oldValue = $oldValue newValue = $newValue")
         if (newValue - oldValue < 2000) {
             super.onBackPressed()
         } else {
             Toast.makeText(this@PagerActivity, getString(R.string.exit_message), Toast.LENGTH_SHORT).show()
         }
     }
+
+    /**
+     * 重写get方法也可以实现Delegates.observable的效果
+     */
+    var mBackPressTime2: Long = 0L
+        set(value) {
+            println("field = " + field + " ,value = " + value)
+            field = value
+        }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,5 +87,7 @@ class PagerActivity : RxActivity() {
 
     override fun onBackPressed() {
         mBackPressTime = System.currentTimeMillis()
+        mBackPressTime2 = System.currentTimeMillis()
+        println(mBackPressTime)
     }
 }
